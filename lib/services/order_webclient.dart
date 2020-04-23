@@ -7,7 +7,7 @@ class OrderWebClient {
   Future<List<Order>> findAll() async {
     final Response response = await get(
         baseUrl
-    );
+    ).timeout(Duration(seconds: 5));
     final List<dynamic> decodedJson = jsonDecode(response.body);
     print(decodedJson);
     List<Order> orders = List();
@@ -18,9 +18,22 @@ class OrderWebClient {
     return orders;
   }
 
+  Future<List<Order>> findAllFinished() async {
+    final Response response = await get(
+        '$baseUrl/history'
+    ).timeout(Duration(seconds: 5));
+    final List<dynamic> decodedJson = jsonDecode(response.body);
+    print(decodedJson);
+    List<Order> orders = List();
+    for (int i = 0; i < decodedJson.length; i++) {
+      orders.add(Order.fromJson(decodedJson[i]));
+    }
+    return orders;
+  }
+
   Future save(Order order) async {
     final String transactionJson = jsonEncode(order.toJson());
-
+    print(transactionJson);
     final Response response = await post(baseUrl,
         headers: {
           'Content-type': "application/json;charset=UTF-8",
@@ -33,9 +46,8 @@ class OrderWebClient {
   }
 
   Future update(Order order) async {
-    print('dentro do update:' + order.itemList.length.toString());
     final String orderJson = jsonEncode(order.toJson());
-    print(orderJson);
+    print('order:' + orderJson);
     final Response response =
     await put('$baseUrl/${order.id}',
         headers: {

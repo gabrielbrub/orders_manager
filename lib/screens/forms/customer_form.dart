@@ -7,19 +7,23 @@ import 'package:ordersmanager/services/customer_webclient.dart';
 
 class CustomerForm extends StatefulWidget {
   String title;
-  String btnText;
-//  String cpf, address, phoneNumber, name;
+  String btnText='';
+
   Customer customer;
   bool isNew = true;
+  bool viewOnly= false;
   CustomerForm.editor(customer){
     title = 'Edit customer';
     btnText = 'Save';
     isNew = false;
+    viewOnly = false;
     this.customer = customer;
-//    this.cpf = customer.cpf;
-//    this.address = customer.address;
-//    this.phoneNumber = customer.phoneNumber;
-//    this.name = customer.name;
+  }
+  CustomerForm.view(customer){
+    viewOnly = true;
+    isNew = false;
+    this.customer = customer;
+    title = 'Customer View';
   }
   CustomerForm(){title = 'New customer'; btnText = 'Add';}
   @override
@@ -64,7 +68,7 @@ class _CustomerFormState extends State<CustomerForm> {
               child: TextField(
                 keyboardType: TextInputType.text,
                 controller: _nameController,
-                enabled: true,
+                enabled: !widget.viewOnly,
                 decoration: InputDecoration(
                   labelText: 'Name',
                 ),
@@ -77,7 +81,7 @@ class _CustomerFormState extends State<CustomerForm> {
               padding: const EdgeInsets.all(8.0),
               child: TextField(
                 controller: _addressController,
-                enabled: true,
+                enabled: !widget.viewOnly,
                 decoration: InputDecoration(
                   labelText: 'Address',
                 ),
@@ -92,7 +96,7 @@ class _CustomerFormState extends State<CustomerForm> {
                 maxLength: 11,
                 keyboardType: TextInputType.number,
                 controller: _cpfController,
-                enabled: true,
+                enabled: !widget.viewOnly,
                 decoration: InputDecoration(
                   labelText: 'CPF',
                 ),
@@ -107,7 +111,7 @@ class _CustomerFormState extends State<CustomerForm> {
                 maxLength: 11,
                 keyboardType: TextInputType.number,
                 controller: _phoneNumberController,
-                enabled: true,
+                enabled: !widget.viewOnly,
                 decoration: InputDecoration(
                   labelText: 'Phone Number',
                 ),
@@ -116,26 +120,29 @@ class _CustomerFormState extends State<CustomerForm> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-              child: SizedBox(
-                width: double.maxFinite,
-                child: RaisedButton(
-                  child: Text(widget.btnText),
-                  onPressed: () async {
-                    Customer customer = Customer(_nameController.text, _cpfController.text,
-                        _addressController.text, _phoneNumberController.text);
-                    setState(() {
-                      _loading = true;
-                    });
-                    if(widget.isNew) {
-                      await _saveCustomer(customer, context);
-                    }else{
-                      await _updateCustomer(customer, context);
-                    }
-                    await Future.delayed(Duration(seconds: 2));
-                    Navigator.pop(context);
-                  },
+            Visibility(
+              visible: !widget.viewOnly,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                child: SizedBox(
+                  width: double.maxFinite,
+                  child: RaisedButton(
+                    child: Text(widget.btnText),
+                    onPressed: () async {
+                      Customer customer = Customer(_nameController.text, _cpfController.text,
+                          _addressController.text, _phoneNumberController.text);
+                      setState(() {
+                        _loading = true;
+                      });
+                      if(widget.isNew) {
+                        await _saveCustomer(customer, context);
+                      }else{
+                        await _updateCustomer(customer, context);
+                      }
+                      await Future.delayed(Duration(seconds: 2));
+                      Navigator.pop(context);
+                    },
+                  ),
                 ),
               ),
             )

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ordersmanager/screens/history.dart';
 import 'package:ordersmanager/screens/products_list.dart';
 
 import 'customers_list.dart';
@@ -11,6 +12,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         title: Text('Orders Manager'),
         centerTitle: true,
@@ -105,26 +107,33 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            color: cardColor,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  SizedBox(),
-                  Icon(
-                    Icons.history,
-                    size: 64,
-                  ),
-                  Text(
-                    'History',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ],
+          InkWell(
+            onTap: (){
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => History(),
+              ));
+            },
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              color: cardColor,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    SizedBox(),
+                    Icon(
+                      Icons.history,
+                      size: 64,
+                    ),
+                    Text(
+                      'History',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

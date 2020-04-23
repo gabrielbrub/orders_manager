@@ -7,7 +7,7 @@ class CustomerWebClient {
   Future<List<Customer>> findAll() async {
     final Response response = await get(
       baseUrl
-    );
+    ).timeout(Duration(seconds: 5));
     final List<dynamic> decodedJson = jsonDecode(response.body);
     print(decodedJson.length);
     List<Customer> customers = List();

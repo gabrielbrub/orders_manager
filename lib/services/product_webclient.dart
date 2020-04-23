@@ -7,7 +7,7 @@ class ProductWebClient {
   Future<List<Product>> findAll() async {
     final Response response = await get(
         baseUrl
-    );
+    ).timeout(Duration(seconds: 5));
     final List<dynamic> decodedJson = jsonDecode(response.body);
     print(decodedJson.length);
     List<Product> products = List();
@@ -28,9 +28,6 @@ class ProductWebClient {
         },
         body: transactionJson)
         .timeout(Duration(seconds: 5));
-//    if (response.statusCode == 200) {
-//      return Product.fromJson(jsonDecode(response.body));
-//    }
   }
 
   Future remove(Product product) async {

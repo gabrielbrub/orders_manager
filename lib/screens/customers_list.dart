@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:ordersmanager/components/fetch_error.dart';
 import 'package:ordersmanager/screens/forms/customer_form.dart';
 import 'package:ordersmanager/services/customer_webclient.dart';
 
@@ -33,18 +34,29 @@ class _CustomersListState extends State<CustomersList> {
                 return ListView.builder(
                   itemCount: customers.length,
                   itemBuilder: (context, index) {
-                    return Card(
-                      child: ListTile(
-                        trailing: InkWell(
-                            child: menu(index),
-                            ),
-                        title: Text(customers[index].name),
+                    return InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CustomerForm.view(customers[index]),
+                          ),
+                        );
+                      },
+                      child: Card(
+                        child: ListTile(
+                          trailing: menu(index),
+                          title: Text(customers[index].name),
+                        ),
                       ),
                     );
                   },
                 );
               }
-              return Center(child: Text('Empty'),);
+              if (snapshot.hasError) return FetchError();
+              return Center(
+                child: Text('Empty'),
+              );
             }
             return Center(child: CircularProgressIndicator());
           }),
@@ -87,11 +99,11 @@ class _CustomersListState extends State<CustomersList> {
       itemBuilder: (context) => [
         PopupMenuItem(
           value: 1,
-          child: Text("Editar"),
+          child: Text("Edit"),
         ),
         PopupMenuItem(
           value: 2,
-          child: Text("Deletar"),
+          child: Text("Delete"),
         ),
       ],
     );
@@ -115,3 +127,4 @@ class _CustomersListState extends State<CustomersList> {
         });
   }
 }
+

@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:ordersmanager/components/date_time_field.dart';
+import 'package:ordersmanager/model/Customer.dart';
 import 'package:ordersmanager/model/Order.dart';
+import 'package:ordersmanager/model/Product.dart';
+import 'package:ordersmanager/screens/product_pick_list.dart';
+import 'package:ordersmanager/services/customer_webclient.dart';
 import 'package:ordersmanager/services/order_webclient.dart';
 
 class OrderForm extends StatefulWidget {
   String title;
   String btnText;
-
-//  String cpf, address, phoneNumber, name;
   Order order;
   bool isNew = true;
 
@@ -31,20 +34,39 @@ class OrderForm extends StatefulWidget {
 class _OrderFormState extends State<OrderForm> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _cpfController = TextEditingController();
-  TextEditingController _dateController = TextEditingController();
   OrderWebClient _webclient = OrderWebClient();
+  CustomerWebClient _customerWebClient = CustomerWebClient();
   bool _loading = false;
-  DateTime _selectedDate;
-  Map _itemMap;
+  Map _itemMap = Map();
+  List<DropdownMenuItem<String>> menuItems = List();
+  Order order;
+  BasicDateTimeField basicDateTimeField;
+  List<Customer> customers = List();
 
   @override
   void initState() {
+    order = widget.order;
     if (!widget.isNew) {
-      _nameController.text = widget.order.customerName;
-      _cpfController.text = widget.order.customerCpf;
+      basicDateTimeField = BasicDateTimeField.withDate(DateTime.parse(order.date)); //remover enabled
+      _itemMap = order.itemMap;
+      _nameController.text = order.customerName;
+      _cpfController.text = order.customerCpf;
+    }else{
+      basicDateTimeField = BasicDateTimeField();
     }
+    _getMenuItems();
     super.initState();
   }
+
+  void _getMenuItems() async{
+    customers = await _customerWebClient.findAll();
+    for(Customer c in customers){
+      if(c!=null)
+      menuItems.add(DropdownMenuItem<String>(child: Text(c.name), value: c.cpf));
+    }
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +82,36 @@ class _OrderFormState extends State<OrderForm> {
               child: LinearProgressIndicator(),
               visible: _loading,
             ),
+            Visibility(
+              visible: widget.isNew,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Select from list: ', style: TextStyle(fontSize: 18),),
+                  Container(
+                    height: 50,
+                    alignment: Alignment.center,
+                    child: DropdownButton<String>(
+                      hint: Text('Customer'),
+                      items: menuItems,
+                      onChanged: (value){
+                        setState(() {
+                          Customer customer = customers.singleWhere((c) => c.cpf == value);
+                          _cpfController.text = customer.cpf;
+                          _nameController.text = customer.name;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(
                 keyboardType: TextInputType.text,
                 controller: _nameController,
-                enabled: true,
+                enabled: widget.isNew, //nao pode alterar cliente de encomenda
                 decoration: InputDecoration(
                   labelText: 'Name',
                 ),
@@ -77,10 +123,10 @@ class _OrderFormState extends State<OrderForm> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(
-                maxLength: 6,
+                maxLength: 11,
                 keyboardType: TextInputType.number,
                 controller: _cpfController,
-                enabled: true,
+                enabled: widget.isNew,
                 decoration: InputDecoration(
                   labelText: 'CPF',
                   counterText: '',
@@ -90,6 +136,7 @@ class _OrderFormState extends State<OrderForm> {
                 ),
               ),
             ),
+            basicDateTimeField,
             Card(
               child: ExpansionTile(
                 title: Text('Items'),
@@ -99,140 +146,54 @@ class _OrderFormState extends State<OrderForm> {
                       Center(child: Text('Add item')),
                       IconButton(
                         icon: Icon(Icons.add_circle),
-                        onPressed: () {
-                          
+                        onPressed: () async {
+                          Product product = await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => ProductPickList(),
+                            ),
+                          );
+                          setState(() {
+                            if (product != null)
+                              _itemMap.putIfAbsent(product.name, () => 1);
+                          });
                         },
                       ),
                     ],
                   ),
-                  createTable(widget.order.itemList),
-//                  ListView.builder(
-//                    physics: NeverScrollableScrollPhysics(),
-//                    shrinkWrap: true,
-//                    scrollDirection: Axis.vertical,
-//                    itemBuilder: (context, index) {
-//                      _itemMap = widget.order.itemList[index];
-//                      String productName = _itemMap['product']['name'];
-//                      return Row(
-//                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                        children: <Widget>[
-//                          Text(productName),
-//                          Text(_itemMap['amount'].toString()),
-//                          IconButton(
-//                            icon: Icon(Icons.remove_circle_outline),
-//                            onPressed: () {
-//                              setState(() {
-//                                if (widget.order.itemList[index]['amount'] <=
-//                                    2) {
-//                                  widget.order.itemList[index]['amount'] = 1;
-//                                } else {
-//                                  widget.order.itemList[index]['amount']--;
-//                                }
-//                              });
-//                            },
-//                          ),
-//                          IconButton(
-//                            icon: Icon(Icons.add_circle_outline),
-//                            onPressed: () {
-//                              setState(() {
-//                                widget.order.itemList[index]['amount']++;
-//                              });
-//                            },
-//                          ),
-//                          IconButton(
-//                            icon: Icon(Icons.delete_forever),
-//                            onPressed: () {
-//                              setState(() {
-//                                widget.order.itemList.removeAt(index);
-//                              });
-//                            },
-//                          ),
-//                        ],
-//                      );
-//                      //Text(productName);
-//                    },
-//                    itemCount: widget.order.itemList.length,
-//                  ),
+                  createTable(),
                 ],
               ),
             ),
             Padding(
               padding:
-                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical:4),
               child: SizedBox(
                 width: double.maxFinite,
                 child: RaisedButton(
                   child: Text(widget.btnText),
                   onPressed: () async {
-                    var formatter = new DateFormat('yyyy-MM-dd HH:mm');
-//                    for (int i = 0; i < widget.order.itemList.length; i++){
-//                      _itemMap = Order.toMap(widget.order.itemList);
-//                    }
-//                      Order order = Order(
-//                        _nameController.text,
-//                        _cpfController.text,
-//                        formatter.format(_selectedDate),
-//                        formatter.format(DateTime.now()),
-//                        _itemMap);
-                    setState(() {
-                      _loading = true;
-                    });
-                    if (widget.isNew) {
-                      //await _webclient.save(order);
+                    //var formatter = new DateFormat('yyyy-MM-dd HH:mm');
+                    if (_itemMap.length > 0) {
+                      setState(() {
+                        _loading = true;
+                      });
+                      if (widget.isNew) {
+                        Order order = Order(_cpfController.text,
+                            basicDateTimeField.datePicked, _itemMap);
+                        await _saveOrder(order);
+                      } else {
+                        order.date = basicDateTimeField.datePicked ?? order.date;
+                        order.itemMap = _itemMap;
+                        await _updateOrder();
+                      }
+                      await Future.delayed(Duration(seconds: 2));
+                      Navigator.pop(context);
                     } else {
-                      print('before update:' + widget.order.itemList[0]['amount'].toString());
-                      await _webclient.update(widget.order);
+                      _showFailureMessage(
+                          context, 'Order needs at least one item');
                     }
-                    await Future.delayed(Duration(seconds: 2));
-                    Navigator.pop(context);
                   },
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Flexible(
-                    flex: 6,
-                    child: TextField(
-                      controller: _dateController,
-                      enabled: false,
-                      decoration: InputDecoration(
-                        labelText: 'Order date',
-                      ),
-                      style: TextStyle(
-                        fontSize: 24.0,
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                    flex: 1,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.date_range,
-                        color: Colors.blueAccent,
-                      ),
-                      onPressed: () async {
-                        _selectedDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2018),
-                          lastDate: DateTime(2030),
-                          builder: (BuildContext context, Widget child) {
-                            return Theme(
-                              data: ThemeData.fallback(),
-                              child: child,
-                            );
-                          },
-                        );
-                        _dateController.text =
-                            ('${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}');
-                      },
-                    ),
-                  ),
-                ],
               ),
             ),
           ],
@@ -241,7 +202,23 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget createTable(List itemList) {
+  Future _updateOrder() async {
+    await _webclient.update(order).catchError((e) {
+      _showFailureMessage(context, 'request timeout');
+    }, test: (e) => e is TimeoutException).catchError((e) {
+      _showFailureMessage(context, 'unknown error');
+    });
+  }
+
+  Future _saveOrder(Order order) async {
+    await _webclient.save(order).catchError((e) {
+      _showFailureMessage(context, 'request timeout');
+    }, test: (e) => e is TimeoutException).catchError((e) {
+      _showFailureMessage(context, 'unknown error');
+    });
+  }
+
+  Widget createTable() {
     return Table(
       border: TableBorder(
         horizontalInside: BorderSide(
@@ -255,85 +232,99 @@ class _OrderFormState extends State<OrderForm> {
           width: 1.0,
         ),
       ),
-      columnWidths: {1: IntrinsicColumnWidth(), 2: IntrinsicColumnWidth(), 3:IntrinsicColumnWidth()},
-      children: createLines(itemList),
+      columnWidths: {
+        1: IntrinsicColumnWidth(),
+        2: IntrinsicColumnWidth(),
+        3: IntrinsicColumnWidth()
+      },
+      children: createLines(),
     );
   }
 
-  List<TableRow> createLines(List itemList) {
+  List<TableRow> createLines() {
     List<TableRow> rows = List();
     rows.add(TableRow(
       children: [
         Center(child: Text('Product')),
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Center(child: Text('Amount')),
         ),
-        Center(child: Text('Actions')),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Center(child: Text('Actions')),
+        ),
       ],
     ));
-    for (int i = 0; i < itemList.length; i++) {
-      rows.add(TableRow(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
-            child: Text(itemList[i]['product']['name']),
-          ),
-          Center(child: Text(itemList[i]['amount'].toString())),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(Icons.remove_circle_outline),
-                onPressed: () {
-                  setState(() {
-                    if (widget.order.itemList[i]['amount'] <= 2) {
-                      widget.order.itemList[i]['amount'] = 1;
-                    } else {
-                      widget.order.itemList[i]['amount']--;
-                    }
-                  });
-                },
+    _itemMap.forEach((product, amount) => rows.add(
+          TableRow(
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
+                child: Text(product),
               ),
-              IconButton(
-                icon: Icon(Icons.add_circle_outline),
-                onPressed: () {
-                  setState(() {
-                    widget.order.itemList[i]['amount']++;
-                  });
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.delete_forever),
-                onPressed: () {
-                  setState(() {
-                    widget.order.itemList.removeAt(i);
-                  });
-                },
+              Center(child: Text(amount.toString())),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.remove_circle_outline),
+                    onPressed: () {
+                      setState(() {
+                        if (amount <= 2) {
+                          _itemMap[product] = 1;
+                        } else {
+                          _itemMap[product]--;
+                        }
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.add_circle_outline),
+                    onPressed: () {
+                      setState(() {
+                        _itemMap[product]++;
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete_forever),
+                    onPressed: () {
+                      setState(() {
+                        _itemMap.remove(product);
+                      });
+                    },
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ));
-    }
+        ));
+
     return rows;
   }
+
 
   void _showFailureMessage(BuildContext context, String message) {
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(content: Text(message), actions: <Widget>[
-            FlatButton(
-              child: Text(
-                "Ok",
-                style: TextStyle(color: Colors.black),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ]);
+          return AlertDialog(
+              content: Text(message),
+              title: Text('Error'),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text(
+                    "Ok",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ]);
         });
   }
 }
+

@@ -6,27 +6,27 @@ class Order{
   String status;
   String date;
   String creationDate;
-  List itemList;
-  //Map itemMap;
+  Map itemMap;
 
   Order.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         customerCpf = json['customer']['cpf'],
         customerName = json['customer']['name'],
         date = json['date'],
+        itemMap = json['products'],
         status = json['status'],
-        creationDate = json['creationDate'],
-        itemList = json['items'];
+        creationDate = json['creationDate'];
+
 
   Map<String, dynamic> toJson() =>
       {
         'date': date,
         'customerCpf' : customerCpf,
-        'products' : _toMap(itemList),
+        'products' : itemMap, //?? toMap(itemList),
         'status' : status
       };
 
-  Map<String, int> _toMap(List itemList){
+  Map<String, int> toMap(List itemList){
     Map<String, int> itemMap = Map();
     for(Map<String, dynamic> map in itemList){
       print(map['product']['name']);
@@ -36,5 +36,5 @@ class Order{
     return itemMap;
   }
 
-  //Order(this.customerCpf, this.customerName, this.date, this.creationDate, this.itemMap);
+  Order(this.customerCpf, this.date, this.itemMap);
 }

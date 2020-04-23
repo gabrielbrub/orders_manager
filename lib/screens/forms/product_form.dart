@@ -6,21 +6,24 @@ import 'package:ordersmanager/services/product_webclient.dart';
 
 class ProductForm extends StatefulWidget {
   String title;
-  String btnText;
+  String btnText='';
 
-//  String cpf, address, phoneNumber, name;
   Product product;
   bool isNew = true;
+  bool viewOnly=false;
+
+  ProductForm.view(product){
+    viewOnly = true;
+    isNew = false;
+    this.product = product;
+    title = 'Product View';
+  }
 
   ProductForm.editor(product) {
     title = 'Edit product';
     btnText = 'Save';
     isNew = false;
     this.product = product;
-//    this.cpf = product.cpf;
-//    this.address = product.address;
-//    this.phoneNumber = product.phoneNumber;
-//    this.name = product.name;
   }
 
   ProductForm() {
@@ -66,7 +69,7 @@ class _ProductFormState extends State<ProductForm> {
               child: TextField(
                 keyboardType: TextInputType.text,
                 controller: _nameController,
-                enabled: true,
+                enabled: !widget.viewOnly,
                 decoration: InputDecoration(
                   labelText: 'Name',
                 ),
@@ -81,7 +84,7 @@ class _ProductFormState extends State<ProductForm> {
                 maxLength: 6,
                 keyboardType: TextInputType.number,
                 controller: _priceController,
-                enabled: true,
+                enabled: !widget.viewOnly,
                 decoration: InputDecoration(
                   labelText: 'Price',
                   counterText: '',
@@ -91,27 +94,30 @@ class _ProductFormState extends State<ProductForm> {
                 ),
               ),
             ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-              child: SizedBox(
-                width: double.maxFinite,
-                child: RaisedButton(
-                  child: Text(widget.btnText),
-                  onPressed: () async {
-                    Product product = Product(_nameController.text,
-                        double.parse(_priceController.text));
-                    setState(() {
-                      _loading = true;
-                    });
-                    if (widget.isNew) {
-                      await _saveProduct(product, context);
-                    } else {
-                      await _updateProduct(product, context);
-                    }
-                    await Future.delayed(Duration(seconds: 2));
-                    Navigator.pop(context);
-                  },
+            Visibility(
+              visible: !widget.viewOnly,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                child: SizedBox(
+                  width: double.maxFinite,
+                  child: RaisedButton(
+                    child: Text(widget.btnText),
+                    onPressed: () async {
+                      Product product = Product(_nameController.text,
+                          double.parse(_priceController.text));
+                      setState(() {
+                        _loading = true;
+                      });
+                      if (widget.isNew) {
+                        await _saveProduct(product, context);
+                      } else {
+                        await _updateProduct(product, context);
+                      }
+                      await Future.delayed(Duration(seconds: 2));
+                      Navigator.pop(context);
+                    },
+                  ),
                 ),
               ),
             )

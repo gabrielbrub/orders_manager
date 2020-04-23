@@ -1,25 +1,23 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:ordersmanager/components/fetch_error.dart';
 import 'package:ordersmanager/model/Product.dart';
 import 'package:ordersmanager/screens/forms/product_form.dart';
 import 'package:ordersmanager/services/product_webclient.dart';
 
-class ProductsList extends StatefulWidget {
+class ProductPickList extends StatefulWidget {
   @override
-  _ProductsListState createState() => _ProductsListState();
+  _ProductPickListState createState() => _ProductPickListState();
 }
 
-class _ProductsListState extends State<ProductsList> {
+class _ProductPickListState extends State<ProductPickList> {
   ProductWebClient webClient = ProductWebClient();
 
   @override
   Widget build(BuildContext context) {
+    Product product;
     List<Product> products = List();
     return Scaffold(
       appBar: AppBar(
-        title: Text('products'),
+        title: Text('Add Item'),
         centerTitle: true,
       ),
       body: FutureBuilder(
@@ -32,25 +30,17 @@ class _ProductsListState extends State<ProductsList> {
                 return ListView.builder(
                   itemCount: products.length,
                   itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: (){
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => ProductForm.view(products[index]),
-                          ),
-                        );
-                      },
-                      child: Card(
-                        child: ListTile(
-                          trailing: menu(products[index], index),
-                          title: Text(products[index].name),
-                        ),
+                    return Card(
+                      child: ListTile(
+                        trailing: IconButton(icon: Icon(Icons.add), onPressed: (){
+                          Navigator.pop(context, products[index]);
+                        },),
+                        title: Text(products[index].name),
                       ),
                     );
                   },
                 );
               }
-              if (snapshot.hasError) return FetchError();
               return Center(child: Text('Empty'),);
             }
             return Center(child: CircularProgressIndicator());
@@ -71,39 +61,6 @@ class _ProductsListState extends State<ProductsList> {
     );
   }
 
-  Widget menu(Product product, int index) {
-    return PopupMenuButton<int>(
-      onSelected: (int result) async {
-        switch (result) {
-          case 1:
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => ProductForm.editor(product),
-              ),
-            );
-            break;
-          case 2:
-            await webClient.remove(product).catchError((e) {
-              _showFailureMessage(context, 'request timeout');
-            }, test: (e) => e is TimeoutException).catchError((e) {
-              _showFailureMessage(context, 'unknown error');
-            });
-            setState(() {});
-            break;
-        }
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 1,
-          child: Text("Edit"),
-        ),
-        PopupMenuItem(
-          value: 2,
-          child: Text("Delete"),
-        ),
-      ],
-    );
-  }
 
   void _showFailureMessage(BuildContext context, String message) {
     showDialog(

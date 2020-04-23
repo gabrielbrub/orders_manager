@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:ordersmanager/components/fetch_error.dart';
 import 'package:ordersmanager/model/Order.dart';
 
 import 'package:ordersmanager/screens/forms/order_form.dart';
+import 'package:ordersmanager/screens/order_viewer.dart';
 import 'package:ordersmanager/services/order_webclient.dart';
 
 class OrdersList extends StatefulWidget {
@@ -19,7 +21,7 @@ class _OrdersListState extends State<OrdersList> {
     List<Order> orders = List();
     return Scaffold(
       appBar: AppBar(
-        title: Text('orders'),
+        title: Text('Orders'),
         centerTitle: true,
       ),
       body: FutureBuilder(
@@ -32,18 +34,26 @@ class _OrdersListState extends State<OrdersList> {
                 return ListView.builder(
                   itemCount: orders.length,
                   itemBuilder: (context, index) {
-                    Map itemMap = orders[index].itemList[0];
-                    String productName = orders[index].itemList[0]['product']['name'];
-                    return Card(
-                      child: ListTile(
-                        trailing: menu(orders[index], index),
-                        title: Text(orders[index].customerName),
-                        subtitle: Text(productName),
+                    return InkWell(
+                      onTap: (){
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => OrderViewer(orders[index]),
+                          ),
+                        );
+                      },
+                      child: Card(
+                        child: ListTile(
+                          trailing: menu(orders[index], index),
+                          title: Text(orders[index].customerName),
+                          subtitle: Text(orders[index].date),
+                        ),
                       ),
                     );
                   },
                 );
               }
+              if (snapshot.hasError) return FetchError();
               return Center(child: Text('Empty'),);
             }
             return Center(child: CircularProgressIndicator());
@@ -87,11 +97,11 @@ class _OrdersListState extends State<OrdersList> {
       itemBuilder: (context) => [
         PopupMenuItem(
           value: 1,
-          child: Text("Editar"),
+          child: Text("Edit"),
         ),
         PopupMenuItem(
           value: 2,
-          child: Text("Deletar"),
+          child: Text("Delete"),
         ),
       ],
     );
