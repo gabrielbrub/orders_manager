@@ -47,7 +47,6 @@ class _ProductPickListState extends State<ProductPickList> {
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print('apertou');
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => ProductForm(),

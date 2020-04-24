@@ -12,19 +12,19 @@ class ProductsList extends StatefulWidget {
 }
 
 class _ProductsListState extends State<ProductsList> {
-  ProductWebClient webClient = ProductWebClient();
+  ProductWebClient _webClient = ProductWebClient();
 
   @override
   Widget build(BuildContext context) {
     List<Product> products = List();
     return Scaffold(
       appBar: AppBar(
-        title: Text('products'),
+        title: Text('Products'),
         centerTitle: true,
       ),
       body: FutureBuilder(
           initialData: List(),
-          future: webClient.findAll(),
+          future: _webClient.findAll(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               if (snapshot.hasData) products = snapshot.data;
@@ -57,7 +57,6 @@ class _ProductsListState extends State<ProductsList> {
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print('apertou');
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => ProductForm(),
@@ -83,7 +82,7 @@ class _ProductsListState extends State<ProductsList> {
             );
             break;
           case 2:
-            await webClient.remove(product).catchError((e) {
+            await _webClient.remove(product).catchError((e) {
               _showFailureMessage(context, 'request timeout');
             }, test: (e) => e is TimeoutException).catchError((e) {
               _showFailureMessage(context, 'unknown error');

@@ -22,7 +22,11 @@ class HomeScreen extends StatelessWidget {
         padding: EdgeInsets.all(8),
         children: <Widget>[
           InkWell(
-            onTap: () => _showCustomersList(context),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => CustomersList(),
+              ));
+            },
             child: Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.0),
@@ -142,9 +146,4 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  _showCustomersList(BuildContext context) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => CustomersList(),
-    ));
-  }
 }

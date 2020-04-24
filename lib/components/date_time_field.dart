@@ -8,7 +8,7 @@ class BasicDateTimeField extends StatelessWidget {
   DateTime currentValue;
   TextEditingController _dateController = TextEditingController();
   String datePicked;
-  bool enabled;
+
   BasicDateTimeField.withDate(this.currentValue):assert(currentValue != null);
   BasicDateTimeField();
 
@@ -22,7 +22,7 @@ class BasicDateTimeField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: DateTimeField(
-        //enabled: enabled,
+        enabled: true,
         controller: _dateController,
         decoration: InputDecoration(
           labelText: 'Order date',
@@ -34,7 +34,7 @@ class BasicDateTimeField extends StatelessWidget {
         onShowPicker: (context, currentValue) async {
           final date = await showDatePicker(
               context: context,
-              firstDate: DateTime(1900),
+              firstDate: DateTime(2020),
               initialDate: currentValue ?? DateTime.now(),
               lastDate: DateTime(2100));
           if (date != null) {

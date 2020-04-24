@@ -13,8 +13,8 @@ class CustomersList extends StatefulWidget {
 }
 
 class _CustomersListState extends State<CustomersList> {
-  CustomerWebClient webClient = CustomerWebClient();
-  List<Customer> customers = List();
+  CustomerWebClient _webClient = CustomerWebClient();
+  List<Customer> _customers = List();
 
   @override
   Widget build(BuildContext context) {
@@ -25,28 +25,28 @@ class _CustomersListState extends State<CustomersList> {
       ),
       body: FutureBuilder(
           initialData: List(),
-          future: webClient.findAll(),
+          future: _webClient.findAll(),
           builder: (context, snapshot) {
             //List<Customer> customers = List();
             if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasData) customers = snapshot.data;
-              if (customers.isNotEmpty) {
+              if (snapshot.hasData) _customers = snapshot.data;
+              if (_customers.isNotEmpty) {
                 return ListView.builder(
-                  itemCount: customers.length,
+                  itemCount: _customers.length,
                   itemBuilder: (context, index) {
                     return InkWell(
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) =>
-                                CustomerForm.view(customers[index]),
+                                CustomerForm.view(_customers[index]),
                           ),
                         );
                       },
                       child: Card(
                         child: ListTile(
                           trailing: menu(index),
-                          title: Text(customers[index].name),
+                          title: Text(_customers[index].name),
                         ),
                       ),
                     );
@@ -82,12 +82,12 @@ class _CustomersListState extends State<CustomersList> {
           case 1:
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => CustomerForm.editor(customers[index]),
+                builder: (context) => CustomerForm.editor(_customers[index]),
               ),
             );
             break;
           case 2:
-            await webClient.remove(customers[index]).catchError((e) {
+            await _webClient.remove(_customers[index]).catchError((e) {
               _showFailureMessage(context, 'request timeout');
             }, test: (e) => e is TimeoutException).catchError((e) {
               _showFailureMessage(context, 'unknown error');

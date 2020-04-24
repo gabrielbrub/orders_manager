@@ -14,7 +14,7 @@ class OrdersList extends StatefulWidget {
 }
 
 class _OrdersListState extends State<OrdersList> {
-  OrderWebClient webClient = OrderWebClient();
+  OrderWebClient _webClient = OrderWebClient();
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class _OrdersListState extends State<OrdersList> {
       ),
       body: FutureBuilder(
           initialData: List(),
-          future: webClient.findAll(),
+          future: _webClient.findAll(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               if (snapshot.hasData) orders = snapshot.data;
@@ -85,7 +85,7 @@ class _OrdersListState extends State<OrdersList> {
             );
             break;
           case 2:
-            await webClient.remove(order).catchError((e) {
+            await _webClient.remove(order).catchError((e) {
               _showFailureMessage(context, 'request timeout');
             }, test: (e) => e is TimeoutException).catchError((e) {
               _showFailureMessage(context, 'unknown error');

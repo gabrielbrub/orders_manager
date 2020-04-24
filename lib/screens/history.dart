@@ -11,7 +11,7 @@ class History extends StatefulWidget {
 }
 
 class _HistoryState extends State<History> {
-  OrderWebClient webClient = OrderWebClient();
+  OrderWebClient _webClient = OrderWebClient();
   @override
   Widget build(BuildContext context) {
     List<Order> orders = List();
@@ -22,7 +22,7 @@ class _HistoryState extends State<History> {
       ),
       body: FutureBuilder(
           initialData: List(),
-          future: webClient.findAllFinished(),
+          future: _webClient.findAllFinished(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               if (snapshot.hasData) orders = snapshot.data;

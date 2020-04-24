@@ -22,19 +22,10 @@ class Order{
       {
         'date': date,
         'customerCpf' : customerCpf,
-        'products' : itemMap, //?? toMap(itemList),
+        'products' : itemMap,
         'status' : status
       };
 
-  Map<String, int> toMap(List itemList){
-    Map<String, int> itemMap = Map();
-    for(Map<String, dynamic> map in itemList){
-      print(map['product']['name']);
-      print(map['amount']);
-      itemMap.putIfAbsent(map['product']['name'], () => map['amount']);
-    }
-    return itemMap;
-  }
 
   Order(this.customerCpf, this.date, this.itemMap);
 }

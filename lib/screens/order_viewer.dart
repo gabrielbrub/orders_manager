@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:ordersmanager/components/item_table.dart';
 import 'package:ordersmanager/model/Customer.dart';
 import 'package:ordersmanager/model/Order.dart';
 import 'package:ordersmanager/services/order_webclient.dart';
@@ -18,7 +19,7 @@ class OrderViewer extends StatefulWidget {
 }
 
 class _OrderViewerState extends State<OrderViewer> {
-  final String title = 'View Order';
+  final String title = 'Order View';
   final String btnText = 'Done';
   OrderWebClient _webClient = OrderWebClient();
   bool _loading = false;
@@ -124,12 +125,13 @@ class _OrderViewerState extends State<OrderViewer> {
                   Row(
                     children: <Widget>[
                       Center(child: Text('Add item')),
-                      IconButton(
-                        icon: Icon(Icons.add_circle),
+                      Icon(
+                        Icons.add_circle,
+                        color: Colors.grey[600],
                       ),
                     ],
                   ),
-                  _createTable(),
+                  ItemTable(itemMap: _itemMap, editable: false),
                 ],
               ),
             ),
@@ -191,72 +193,6 @@ class _OrderViewerState extends State<OrderViewer> {
     });
   }
 
-  Widget _createTable() {
-    return Table(
-      border: TableBorder(
-        horizontalInside: BorderSide(
-          color: Colors.black,
-          style: BorderStyle.solid,
-          width: 1.0,
-        ),
-        verticalInside: BorderSide(
-          color: Colors.black,
-          style: BorderStyle.solid,
-          width: 1.0,
-        ),
-      ),
-      columnWidths: {
-        1: IntrinsicColumnWidth(),
-        2: IntrinsicColumnWidth(),
-        3: IntrinsicColumnWidth()
-      },
-      children: _createLines(),
-    );
-  }
-
-  List<TableRow> _createLines() {
-    List<TableRow> rows = List();
-    rows.add(TableRow(
-      children: [
-        Center(child: Text('Product')),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Center(child: Text('Amount')),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Center(child: Text('Actions')),
-        ),
-      ],
-    ));
-    _itemMap.forEach((product, amount) => rows.add(
-      TableRow(
-        children: [
-          Padding(
-            padding:
-            const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
-            child: Text(product),
-          ),
-          Center(child: Text(amount.toString())),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(Icons.remove_circle_outline, color: Colors.grey,),
-              ),
-              IconButton(
-                icon: Icon(Icons.add_circle_outline, color: Colors.grey,),
-              ),
-              IconButton(
-                icon: Icon(Icons.delete_forever, color: Colors.grey),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ));
-    return rows;
-  }
 
   void _showFailureMessage(BuildContext context, String message) {
     showDialog(
