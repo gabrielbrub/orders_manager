@@ -13,17 +13,16 @@ MySQL 8
 ## Uso
 
 * Altere as constantes IP_ADRESS e PORT em orders_manager\lib\services\networking.dart
-* Baixe e execute ordersdb.jar do projeto [OrdersDB](https://github.com/gabrielbrub/ordersdb).
-```
-java -jar ordersdb.jar
- ```
 * Crie o usuário 'OrdersManager'@'localhost' (sem senha) com grants no MySQL:
 
 ```
  create user 'OrdersManager'@'localhost' identified by '';
  grant select, insert, delete, update on ordersdb.* to 'OrdersManager'@'localhost';
  ```
- 
+ * Baixe e execute ordersdb.jar do projeto [OrdersDB](https://github.com/gabrielbrub/ordersdb).
+```
+java -jar ordersdb.jar
+ ```
 ## Capturas de Tela
 
 <p float="left" align="middle" hspace="20"">
