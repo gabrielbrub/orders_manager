@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ordersmanager/screens/forms/login_form.dart';
 import 'screens/home_screen.dart';
 
 void main() => runApp(OrdersManager());
@@ -8,14 +9,22 @@ class OrdersManager extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        primaryColor: Colors.green[800],
-        accentColor: Colors.green[500],
+        primaryColor: Color(0xFF2AB775), //(0xFF2DC880)
+        accentColor: Color(0xFF26A66A), //(0Xff59D99D)
+        primaryTextTheme: TextTheme(
+            title: TextStyle(
+                color: Colors.white
+            )
+        ),
+        primaryIconTheme: const IconThemeData.fallback().copyWith(
+          color: Colors.white,
+        ),
         buttonTheme: ButtonThemeData(
-          buttonColor: Colors.green[500],
+          buttonColor: Color(0xFF26A66A),
           textTheme: ButtonTextTheme.primary,
         ),
       ),
-      home: HomeScreen(),
+      home: HomeScreen(),//LoginForm(),
     );
   }
 }

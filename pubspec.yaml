@@ -20,6 +20,7 @@ dependencies:
   http:
   intl:
   datetime_picker_formfield:
+  flutter_secure_storage: ^3.3.3
   flutter:
     sdk: flutter
 

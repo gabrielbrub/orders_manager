@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:ordersmanager/screens/forms/login_form.dart';
 import 'package:ordersmanager/screens/history.dart';
 import 'package:ordersmanager/screens/products_list.dart';
 
@@ -7,16 +9,40 @@ import 'customers_list.dart';
 import 'orders_list.dart';
 
 class HomeScreen extends StatelessWidget {
-  final Color cardColor = Colors.lightGreen[100];
+  final Color cardColor = Color(0xFF48D594);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         title: Text('Orders Manager'),
         centerTitle: true,
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.exit_to_app,
+              color: Colors.white,
+          ),
+            onPressed: () async {_logoutAndRedirect(context);},
+          ),
+        ],
       ),
+//      drawer: Drawer(
+//        child: ListView(
+//          children: <Widget>[
+//            DrawerHeader(
+//              decoration: BoxDecoration(
+//                color: Color(0xFF48D594),
+//              ),
+//            ),
+//            FlatButton(
+//              onPressed: () async {_logoutAndRedirect(context);},
+//              child: Container(
+//                  padding: EdgeInsets.symmetric(vertical: 8),
+//                  child: Row(children: <Widget>[Text('Logout'), SizedBox(width: 6) ,Icon(Icons.exit_to_app)]),
+//              ),
+//            ),
+//          ],
+//        ),
+//      ),
       body: GridView.count(
         crossAxisCount: 2,
         padding: EdgeInsets.all(8),
@@ -31,7 +57,7 @@ class HomeScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              color: Colors.lightGreen[100],
+              color: cardColor,
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
@@ -40,11 +66,12 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(),
                     Icon(
                       Icons.people,
-                      size: 64,
+                      size: 56,
+                      color: Colors.white,
                     ),
                     Text(
                       'Customers',
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -61,7 +88,7 @@ class HomeScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              color: Colors.lightGreen[100],
+              color: Color(0xFF48D594),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
@@ -70,11 +97,12 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(),
                     Icon(
                       Icons.shop_two,
-                      size: 64,
+                      size: 56,
+                      color: Colors.white,
                     ),
                     Text(
                       'Products',
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -100,11 +128,12 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(),
                     Icon(
                       Icons.playlist_add_check,
-                      size: 64,
+                      size: 56,
+                      color: Colors.white,
                     ),
                     Text(
                       'Orders',
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -130,11 +159,12 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(),
                     Icon(
                       Icons.history,
-                      size: 64,
+                      size: 56,
+                      color: Colors.white,
                     ),
                     Text(
                       'History',
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -144,6 +174,15 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  _logoutAndRedirect(BuildContext context) async{
+    final storage = new FlutterSecureStorage();
+    await storage.deleteAll();
+    Navigator.of(context).pushAndRemoveUntil(new MaterialPageRoute(builder: (BuildContext context) => LoginForm()), (Route<dynamic> route) => false);
+//    Navigator
+//        .of(context)
+//        .pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => LoginForm(),));
   }
 
 }
